@@ -55,10 +55,9 @@ public class FragmentSearch extends Fragment implements AdapterCommunicator {
             @Override
             public void onRefresh() {
                 getRecyclerData(mQuery);
-
+                mSwipe.setRefreshing(false);
             }
         });
-        mSwipe.setRefreshing(false);
         return layout;
     }
 

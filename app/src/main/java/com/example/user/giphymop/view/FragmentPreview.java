@@ -3,18 +3,27 @@ package com.example.user.giphymop.view;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.example.user.giphymop.R;
 
 public class FragmentPreview extends Fragment {
 
+    private ProgressBar progressBar;
     private OnFragmentInteractionListener mListener;
     ImageView mImageView;
     String mUrl;
@@ -37,7 +46,25 @@ public class FragmentPreview extends Fragment {
         Bundle args = getArguments();
         mUrl = args.getString("url");
         mImageView = layout.findViewById(R.id.preview_image);
-        Glide.with(this).load(mUrl).into(mImageView);
+        progressBar = (ProgressBar) layout.findViewById(R.id.progressBar);
+
+
+
+        progressBar.setVisibility(View.VISIBLE);
+
+        Glide.with(this).asGif().load(mUrl).listener(new RequestListener<GifDrawable>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<GifDrawable> target, boolean isFirstResource) {
+                progressBar.setVisibility(View.GONE);
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
+                progressBar.setVisibility(View.GONE);
+                return false;
+            }
+        }).into(mImageView);
         return layout;
     }
 

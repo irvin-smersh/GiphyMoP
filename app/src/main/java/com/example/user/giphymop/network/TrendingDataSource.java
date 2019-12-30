@@ -2,9 +2,11 @@ package com.example.user.giphymop.network;
 
 import android.arch.paging.PositionalDataSource;
 import android.support.annotation.NonNull;
+import android.widget.Toast;
 
 import com.example.user.giphymop.Model.Data;
 import com.example.user.giphymop.Model.TrendingResponse;
+import com.example.user.giphymop.MyApplication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ public class TrendingDataSource extends PositionalDataSource<Data> {
         int position = computeInitialLoadPosition(params, COUNT);
         int loadSize = computeInitialLoadSize(params, position, COUNT);
 
-        giphyApi.getTrendingGifs(API_KEY, 10, 10).enqueue(new Callback<TrendingResponse>() {
+        giphyApi.getTrendingGifs(API_KEY, loadSize, position).enqueue(new Callback<TrendingResponse>() {
             @Override
             public void onResponse(Call<TrendingResponse> call, Response<TrendingResponse> response) {
                 if(response.isSuccessful()) {
@@ -43,14 +45,14 @@ public class TrendingDataSource extends PositionalDataSource<Data> {
 
             @Override
             public void onFailure(Call<TrendingResponse> call, Throwable t) {
-
+                Toast.makeText(MyApplication.getInstance(), "Can't reach the server! Check your internet connection!", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     @Override
     public void loadRange(@NonNull LoadRangeParams params, @NonNull LoadRangeCallback<Data> callback) {
-        giphyApi.getTrendingGifs(API_KEY, params.startPosition+10, params.startPosition + params.loadSize).enqueue(new Callback<TrendingResponse>() {
+        giphyApi.getTrendingGifs(API_KEY, params.loadSize, params.startPosition + params.loadSize).enqueue(new Callback<TrendingResponse>() {
             @Override
             public void onResponse(Call<TrendingResponse> call, Response<TrendingResponse> response) {
                 if(response.isSuccessful()) {
@@ -63,7 +65,7 @@ public class TrendingDataSource extends PositionalDataSource<Data> {
 
             @Override
             public void onFailure(Call<TrendingResponse> call, Throwable t) {
-
+                Toast.makeText(MyApplication.getInstance(), "Can't reach the server! Check your internet connection!", Toast.LENGTH_SHORT).show();
             }
         });
     }

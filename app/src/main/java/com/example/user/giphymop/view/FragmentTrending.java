@@ -51,6 +51,7 @@ public class FragmentTrending extends Fragment implements AdapterCommunicator {
             @Override
             public void onRefresh() {
                 getRecyclerData();
+                mSwipe.setRefreshing(false);
             }
         });
         return layout;

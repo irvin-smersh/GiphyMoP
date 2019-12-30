@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 
@@ -48,6 +49,7 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements FragmentTrending.OnFragmentInteractionListener, FragmentPreview.OnFragmentInteractionListener, FragmentSearch.OnFragmentInteractionListener {
 
     Toolbar mToolbar;
+    ProgressBar progressBar;
     MaterialSearchView mSearchView;
     FloatingActionButton btnChooseVideo;
     GiphyApi fileService;
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements FragmentTrending.
         btnChooseVideo = findViewById(R.id.choose_video);
         mToolbar = findViewById(R.id.toolbar);
         mSearchView = findViewById(R.id.searchView);
+        progressBar = findViewById(R.id.progressBarUpload);
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -70,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements FragmentTrending.
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.fragment_container, fragment_trending, "Trending");
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
 
         fileService = RetrofitClientUpload.getFileService();
@@ -99,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements FragmentTrending.
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.add(R.id.fragment_container, fragment_search, "Search");
+                fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
 
                 return true;
@@ -138,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements FragmentTrending.
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, fragmentPreview, "Preview");
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 
@@ -180,9 +186,11 @@ public class MainActivity extends AppCompatActivity implements FragmentTrending.
         RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
         Call<ResponseBody> call = fileService.uploadVideo(body);
+        progressBar.setVisibility(View.VISIBLE);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                progressBar.setVisibility(View.GONE);
                 if(response.isSuccessful()){
                     Toast.makeText(MainActivity.this, "Video uploaded successfully", Toast.LENGTH_LONG).show();
                     Log.i("UPLOAD", "Video uploaded successfully");
@@ -191,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements FragmentTrending.
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                progressBar.setVisibility(View.GONE);
                 Toast.makeText(MainActivity.this, "ERROR: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 Log.i("UPLOAD", "ERROR: " + t.getMessage());
             }
@@ -237,5 +246,22 @@ public class MainActivity extends AppCompatActivity implements FragmentTrending.
             }
 
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(getSupportFragmentManager().getBackStackEntryCount()>0){
+            getSupportFragmentManager().popBackStack();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        if(getSupportFragmentManager().getBackStackEntryCount()>0){
+            getSupportFragmentManager().popBackStack();
+        }
+        return true;
     }
 }
